@@ -45,9 +45,16 @@ exports.tn_createSession = (req, res, next) => {
     igastoken.createsess(host, quantity, session,{authorization: host});
   }).then(result =>{
       console.log("Session created, id: " + session);
+      console.log("results: " + result);
+      if(!err)
         return res.status(201).json({
           message:"Session created, id: " + session
         });
+    }).catch(err => {
+      console.log("err2");
+      return res.status(400).json({
+        message: "Session creation failed!"
+      });
     });
 };
 
@@ -62,8 +69,14 @@ exports.tn_joinSession = (req, res, next) => {
     igastoken.joinsess(player, quantity, session,{authorization: player});
   }).then(result =>{
       console.log("Player " + player + " joined into the session: " + session + "with " + quantity);
+      console.log(result);
         return res.status(201).json({
           message:"Player " + player + " joined into the session: " + session + "with " + quantity
+        }).catch(err => {
+          console.log(err);
+          return res.status(500).json({
+            message: err
+          });
         });
     });
 };
@@ -79,7 +92,7 @@ exports.tn_winner = (req, res, next) => {
     // Transfer is one of the actions in currency.abi
     igastoken.winner(host, winner, percentage, session, {authorization: host});
   }).then(result =>{
-      console.log("Winner of the session " + session + "i s " + winner + " !");
+      console.log("Winner of the session " + session + "is " + winner + " !");
         return res.status(201).json({
           message:"Winner of the session " + session + " is " + winner + " !"
         });

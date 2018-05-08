@@ -27,49 +27,59 @@ exports.user_register = (req, res, next) => {
                 message: "Username exists"
               });
             } else {
-
               ecc.randomKey().then(privateKey => {
                 const publicKey = ecc.privateToPublic(privateKey);
                 const keyProvider = ['5JbfjFuet39xyWU8FaAEnssKQLCCgT7V6uxFz2jEzQ2nDr2Giz8'];
                 const eos = Eos.Localnet({keyProvider});
-                eos.newaccount({
-                  creator: 'igastoken',
-                  name: req.body.username,
-                  owner: publicKey,
-                  active: publicKey,
-                  recovery: 'igastoken'
-                }).then(() => {
-                  eos.contract('igastoken').then(igastoken => {
-                    // Transfer is one of the actions in currency.abi
-                    igastoken.transfer("igastoken", req.body.username, "0.0001 IGT", "");
-                  });
-                  const user = new User({
-                    _id: new mongoose.Types.ObjectId(),
-                    email: req.body.email,
-                    username: req.body.username,
-                    address: publicKey
-                  });
-                  user
-                    .save()
-                    .then(result => {
-                      console.log(result + "private key: " + privateKey);
-                      return res.status(201).json({
-                        success: true,
-                        privateKey: privateKey,
-                        message: "User successfully created!!  privateKey = " + privateKey + "  publicKey: " + publicKey
+
+                eos.getAccount(req.body.username).then(result => {
+                  console.log(result);
+                  if(result.permissions.length == 0){
+                    eos.newaccount({
+                      creator: 'igastoken',
+                      name: req.body.username,
+                      owner: publicKey,
+                      active: publicKey,
+                      recovery: 'igastoken'
+                    }).then(() => {
+                      eos.contract('igastoken').then(igastoken => {
+                        // Transfer is one of the actions in currency.abi
+                        igastoken.transfer("igastoken", req.body.username, "0.0001 IGT", "");
                       });
-                    })
-                    .catch(err => {
+                      const user = new User({
+                        _id: new mongoose.Types.ObjectId(),
+                        email: req.body.email,
+                        username: req.body.username,
+                        address: publicKey
+                      });
+                      user
+                        .save()
+                        .then(result => {
+                          console.log(result + "private key: " + privateKey);
+                          return res.status(201).json({
+                            success: true,
+                            privateKey: privateKey,
+                            message: "User successfully created!!  privateKey = " + privateKey + "  publicKey: " + publicKey
+                          });
+                        })
+                        .catch(err => {
+                          console.log(err);
+                          return res.status(500).json({
+                            error: err
+                          });
+                        });
+                    }).catch(err => {
                       console.log(err);
                       return res.status(500).json({
-                        error: err
+                        error:err
                       });
                     });
-                }).catch(err => {
-                  console.log(err);
-                  return res.status(500).json({
-                    error:err
-                  });
+                  }else {
+                    return res.status(500).json({
+                      success: false,
+                      message: "Your username is taken"
+                    });
+                  }
                 });
               }).catch(err => {
                 console.log(err);
@@ -77,8 +87,6 @@ exports.user_register = (req, res, next) => {
                   error:err
                 });
               });
-
-
             }
           }).catch(err => {
             console.log(err);
@@ -150,7 +158,7 @@ exports.user_profile = (req, res, next) => {
       const eos = Eos.Localnet({keyprovider});
       const gettableoptions = {
         json: true,
-        table_key: "IGT",
+        table_key: "IGS",
         scope: req.params.username,
         code: "igastoken",
         table: "accounts"

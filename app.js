@@ -18,7 +18,7 @@ const userRoutes = require('./api/routes/user');
 
 mongoose.connect(
   "mongodb://basarcan:" +
-  "patates1" +
+  process.env.MONGO_ATLAS_PW +
     "@demoapi-shard-00-00-esbxb.mongodb.net:27017,demoapi-shard-00-01-esbxb.mongodb.net:27017,demoapi-shard-00-02-esbxb.mongodb.net:27017/test?ssl=true&replicaSet=demoapi-shard-0&authSource=admin",
   {
     useMongoClient: true
