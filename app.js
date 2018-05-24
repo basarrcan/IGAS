@@ -2,7 +2,6 @@ const express = require("express");
 const app = express();
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
 const dotenv = require('dotenv');
 
 const result = dotenv.config();
@@ -14,20 +13,6 @@ if (result.error) {
 console.log(result.parsed);
 
 const transactionRoutes = require('./api/routes/transaction');
-const userRoutes = require('./api/routes/user');
-
-mongoose.connect(
-  "mongodb://basarcan:" +
-  process.env.MONGO_ATLAS_PW +
-    "@demoapi-shard-00-00-esbxb.mongodb.net:27017,demoapi-shard-00-01-esbxb.mongodb.net:27017,demoapi-shard-00-02-esbxb.mongodb.net:27017/test?ssl=true&replicaSet=demoapi-shard-0&authSource=admin",
-  {
-    useMongoClient: true
-  }
-).once('open', () => console.log('Connected to MongoLab instance.'))
-  .on('error', error => console.log('Error connecting to MongoLab:', error));
-
-
-mongoose.Promise = global.Promise;
 
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -46,9 +31,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routes which should handle requests
-app.use("/user", userRoutes);
-app.use("/transaction", transactionRoutes);
+app.use("/", transactionRoutes);
 
 app.use((req, res, next) => {
   const error = new Error("Not found");
