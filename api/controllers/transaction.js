@@ -148,7 +148,6 @@ exports.tn_createSession = (req, res, next) => {
   }).then(result => {
     console.log("Session created, id: " + session);
     console.log("results: " + result);
-    if (!err)
       return res.status(201).json({
         message: "Session created, id: " + session
       });
@@ -174,11 +173,11 @@ exports.tn_joinSession = (req, res, next) => {
     console.log(result);
     return res.status(201).json({
       message: "Player " + player + " joined into the session: " + session + "with " + quantity
-    }).catch(err => {
-      console.log(err);
-      return res.status(500).json({
-        message: err
-      });
+    });
+  }).catch(err => {
+    console.log(err);
+    return res.status(500).json({
+      message: err
     });
   });
 };
